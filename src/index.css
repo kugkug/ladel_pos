@@ -1,0 +1,440 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* APEX Brand Colors */
+    --primary: 16 100% 60%; /* #FF6B35 */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 203 48% 34%; /* #2C5F7F */
+    --secondary-foreground: 0 0% 100%;
+    
+    --accent: 196 61% 79%; /* #A8D8EA */
+    --accent-foreground: 203 48% 34%;
+    
+    /* Neutral Colors */
+    --neutral-dark: 210 29% 24%; /* #2C3E50 */
+    --neutral-light: 192 15% 94%; /* #ECF0F1 */
+    
+    /* Status Colors */
+    --status-success: 145 63% 42%; /* #27AE60 */
+    --status-warning: 28 80% 52%; /* #E67E22 */
+    --status-danger: 6 78% 57%; /* #E74C3C */
+
+    /* shadcn/ui variables */
+    --background: 0 0% 100%;
+    --foreground: 210 29% 24%; /* neutral-dark */
+    --card: 0 0% 100%;
+    --card-foreground: 210 29% 24%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 29% 24%;
+    --muted: 192 15% 94%; /* neutral-light */
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --destructive: 6 78% 57%; /* status-danger */
+    --destructive-foreground: 0 0% 100%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 16 100% 60%; /* primary */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 210 29% 24%; /* neutral-dark */
+    --foreground: 192 15% 94%; /* neutral-light */
+    --card: 210 29% 24%;
+    --card-foreground: 192 15% 94%;
+    --popover: 210 29% 24%;
+    --popover-foreground: 192 15% 94%;
+    --primary: 16 100% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 203 48% 34%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 196 61% 79%;
+    --accent-foreground: 210 29% 24%;
+    --destructive: 6 78% 57%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 16 100% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body,
+  #root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: hsl(var(--secondary));
+  }
+}
+
+/* APEX Utilities */
+.bg-apex-gradient {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+}
+
+/* Dashboard Utilities */
+.dashboard-card {
+  @apply rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden;
+}
+
+.badge-pending {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-[hsl(var(--status-warning)_/_0.1)] text-[hsl(var(--status-warning))] border border-[hsl(var(--status-warning)_/_0.2)];
+}
+
+.badge-overdue {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-[hsl(var(--status-danger)_/_0.1)] text-[hsl(var(--status-danger))] border border-[hsl(var(--status-danger)_/_0.2)];
+}
+
+.badge-completed {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-[hsl(var(--status-success)_/_0.1)] text-[hsl(var(--status-success))] border border-[hsl(var(--status-success)_/_0.2)];
+}
+
+.skeleton-loader {
+  @apply bg-gray-200 animate-pulse rounded;
+}
+
+/* Dashboard Tables Styling */
+.dashboard-tables {
+  @apply flex flex-col gap-6;
+}
+
+.table-section {
+  @apply bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col;
+}
+
+.table-header {
+  @apply flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-50/50;
+}
+
+.data-table {
+  @apply w-full text-left text-sm whitespace-nowrap;
+}
+
+.data-table thead tr {
+  @apply bg-[hsl(var(--secondary))] text-white uppercase tracking-wider text-xs font-semibold;
+}
+
+.data-table th {
+  @apply px-6 py-3 font-semibold;
+}
+
+.data-table tbody tr {
+  @apply border-b border-gray-100 hover:bg-gray-50/50 transition-colors duration-150;
+}
+
+.data-table tbody tr:last-child {
+  @apply border-b-0;
+}
+
+.data-table td {
+  @apply px-6 py-4 text-gray-600;
+}
+
+.data-table .amount {
+  @apply text-right font-mono tracking-tight;
+}
+
+.empty-state {
+  @apply p-8 text-center text-gray-500 italic bg-gray-50/30;
+}
+
+.error {
+  @apply bg-red-50 text-red-600 font-medium;
+}
+
+/* PR Number Styling */
+.pr-number {
+  font-weight: 700;
+  color: hsl(var(--secondary));
+  background: hsl(var(--neutral-light));
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: 0.5px;
+  transition: background-color 0.2s ease;
+  display: inline-block;
+}
+
+.data-table tbody tr:hover .pr-number {
+  background: hsl(var(--accent) / 0.3);
+}
+
+/* Reports Specific Styles */
+.report-container {
+  @apply bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden w-full;
+}
+
+.report-table {
+  @apply w-full text-left text-sm whitespace-nowrap border-collapse;
+}
+
+.report-table thead tr {
+  @apply bg-[hsl(var(--secondary))] text-white border-b-2 border-gray-300;
+}
+
+.report-table th {
+  @apply px-4 py-3 font-semibold uppercase tracking-wider text-xs whitespace-nowrap bg-[hsl(var(--secondary))];
+}
+
+.report-table tbody tr {
+  @apply border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150;
+}
+
+/* Alternating row colors for reports */
+.report-table tbody tr:nth-child(even) {
+  @apply bg-gray-50/50;
+}
+
+.report-table td {
+  @apply px-4 py-3 text-gray-700;
+}
+
+.report-total-row {
+  @apply bg-orange-50 font-bold border-t-2 border-[hsl(var(--primary))] text-gray-900 shadow-[0_-2px_4px_rgba(0,0,0,0.05)];
+}
+
+.report-total-row:hover {
+  @apply bg-orange-100/80 !important;
+}
+
+.report-total-row td {
+  @apply py-4;
+}
+
+/* Sticky column for reports */
+.sticky-col {
+  @apply sticky left-0 z-10 bg-inherit border-r border-gray-200 shadow-[2px_0_4px_rgba(0,0,0,0.05)];
+}
+.report-table thead .sticky-col {
+  @apply bg-[hsl(var(--secondary))] text-white z-20 shadow-[2px_0_4px_rgba(0,0,0,0.1)];
+}
+.report-table tbody tr:nth-child(even) .sticky-col {
+  @apply bg-[#f9fafb]; /* Matches bg-gray-50/50 approx */
+}
+.report-table tbody tr:hover .sticky-col {
+  @apply bg-gray-50; /* Matches hover state */
+}
+.report-total-row .sticky-col {
+  @apply bg-orange-50; /* Matches total row bg */
+}
+.report-total-row:hover .sticky-col {
+  @apply bg-orange-100/80;
+}
+
+/* Hide scrollbar for nav menus */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Global responsive guards */
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+}
+
+table {
+  width: 100%;
+}
+
+/* Ensure common scroll containers can shrink and scroll correctly */
+.overflow-x-auto,
+.overflow-y-auto,
+.overflow-auto {
+  min-width: 0;
+}
+
+/* Global custom scrollbar for vertical/horizontal overflow areas */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 #f1f5f9;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border: 2px solid #f1f5f9;
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+*::-webkit-scrollbar-corner {
+  background: #f1f5f9;
+}
+
+/* Mobile readability tweaks */
+@media (max-width: 640px) {
+  .doc-section-header {
+    @apply flex-col items-start gap-2;
+  }
+
+  .table-header {
+    @apply flex-col items-start gap-2;
+  }
+}
+
+
+/* Warning Banner Styling */
+.warning {
+  background: hsl(var(--status-warning) / 0.1);
+  border: 1px solid hsl(var(--status-warning));
+  color: hsl(var(--status-warning));
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Custom styles for contact section */
+.contact-empty-state {
+  background: hsl(var(--accent) / 0.2);
+  border: 1px solid hsl(var(--secondary));
+  padding: 24px;
+  border-radius: 8px;
+}
+
+.contact-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.contact-table-header {
+  background: hsl(var(--secondary));
+  color: white;
+}
+
+.contact-table-row {
+  background: white;
+  border-bottom: 1px solid #E5E7EB;
+  transition: background-color 0.2s;
+}
+
+.contact-table-row:last-child {
+  border-bottom: none;
+}
+
+.contact-table-row:hover {
+  background: #F9FAFB;
+}
+
+.contact-primary-row {
+  background: hsl(var(--accent) / 0.1);
+}
+
+.contact-primary-row:hover {
+  background: hsl(var(--accent) / 0.3);
+}
+
+/* Document Section Styles for Full Preview */
+.not-created-yet {
+  @apply text-gray-500 italic bg-gray-50 py-6 px-4 rounded-lg text-center border border-dashed border-gray-300 w-full;
+}
+
+.doc-section {
+  @apply mb-8 border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white print:border print:border-black print:shadow-none print:mb-6;
+}
+
+.doc-section-header {
+  @apply bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center print:bg-gray-100 print:border-black;
+}
+
+.doc-section-title {
+  @apply font-bold text-gray-900 flex items-center gap-2 text-lg;
+}
+
+.amount-display {
+  @apply font-mono font-medium tracking-tight;
+}
+
+/* Module Permissions Animation Styles */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+/* Internal Code Display Styles */
+.internal-code-placeholder {
+  background-color: #F3F4F6;
+  color: #6B7280;
+  font-style: italic;
+  border-color: #E5E7EB;
+}
+
+.internal-code-assigned {
+  background-color: #DCFCE7 !important;
+  color: #166534 !important;
+  font-weight: bold !important;
+  border-color: #22C55E !important;
+  border-width: 2px !important;
+  box-shadow: 0 1px 3px rgba(34, 197, 94, 0.2);
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .print-break-inside-avoid {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  .print-no-shadow {
+    box-shadow: none !important;
+  }
+
+  table {
+    border-collapse: collapse !important;
+  }
+  
+  th, td {
+    border-bottom: 1px solid #000 !important;
+  }
+  
+  th {
+    background-color: #f3f4f6 !important;
+    color: #000 !important;
+  }
+}
