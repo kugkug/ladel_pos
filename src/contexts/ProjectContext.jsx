@@ -107,7 +107,16 @@ export const ProjectProvider = ({ children }) => {
         
         if (quotationData.dateIssued) qtPayload.date_issued = quotationData.dateIssued;
         if (quotationData.orderDescription) qtPayload.order_description = quotationData.orderDescription.trim();
-        if (quotationData.netAmount) qtPayload.net_amount = parseFloat(quotationData.netAmount);
+        if (quotationData.netAmount ?? quotationData.net_amount) {
+          qtPayload.net_amount = parseFloat(
+            quotationData.netAmount ?? quotationData.net_amount
+          );
+        }
+        if (quotationData.grossAmount ?? quotationData.gross_amount) {
+          qtPayload.gross_amount = parseFloat(
+            quotationData.grossAmount ?? quotationData.gross_amount
+          );
+        }
         if (quotationData.taxType) qtPayload.tax_type = quotationData.taxType;
 
         const { data: qtData, error: qtError } = await supabase.from('quotations').insert([qtPayload]).select().single();

@@ -21,7 +21,7 @@ const ModuleSwitcher = () => {
     { id: 'home', icon: Home, path: '/', label: 'Home' },
     { id: 'sales', icon: LineChart, path: '/sales/dashboard', label: 'Sales' },
     { id: 'expenses', icon: Wallet, path: '/expenses', label: 'Expenses' },
-    { id: 'reports', icon: BarChart3, path: '#', label: 'Reports', disabled: true },
+    { id: 'reports', icon: BarChart3, path: '/reports', label: 'Reports', disabled: false },
   ];
 
   return (

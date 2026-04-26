@@ -92,7 +92,7 @@ const DashboardPage = () => {
                     </div>
                 </div>
 
-                <div className='grid grid-cols-1 xl:grid-cols-3 gap-6 items-start'>
+                <div className='grid grid-cols-1  gap-6 items-start'>
                     <div className='xl:col-span-2'>
                         <div className='dashboard-tables'>
                             <OverdueReceivablesTable
@@ -110,9 +110,9 @@ const DashboardPage = () => {
                         </div>
                     </div>
 
-                    <div className='xl:col-span-1 h-full min-h-[500px]'>
+                    {/* <div className='xl:col-span-1 h-full min-h-[500px]'>
                         <DailyRemindersPanel />
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </>
