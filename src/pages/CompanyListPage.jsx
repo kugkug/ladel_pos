@@ -10,36 +10,44 @@ import {
     Trash2,
     Building2,
     ArrowUpDown,
-    Download
+    Download,
+    ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import CompanyFormModal from '@/components/CompanyFormModal';
 import { exportToCSV, generateFilename } from '@/lib/csvExport';
 
-/** Single search box: TIN, company name, address, city, any contact person fields. */
-const buildCompanySearchHaystack = (c) => {
+const SEARCH_FIELD_OPTIONS = [
+    { value: 'all', label: 'All Columns' },
+    { value: 'company_name', label: 'Company Name' },
+    { value: 'company_tin', label: 'TIN Number' },
+    { value: 'company_address', label: 'Address' },
+    { value: 'contact_name', label: 'Contact Person' }
+];
+
+const getCompanySearchValuesByField = (c, field = 'all') => {
     const contacts = c.contacts || [];
-    const contactBits = contacts.flatMap((ct) => [
-        ct.contact_name,
-        ct.contact_email,
-        ct.contact_phone,
-        ct.role_title
-    ]);
-    const parts = [
-        c.company_name,
-        c.company_tin,
-        c.company_address,
-        c.city,
+    const contactNames = [
         c.primary_contact?.contact_name,
-        c.primary_contact?.contact_email,
-        c.primary_contact?.contact_phone,
-        ...contactBits
+        ...contacts.map((ct) => ct.contact_name)
     ];
-    return parts
+
+    const fieldMap = {
+        company_name: [c.company_name],
+        company_tin: [c.company_tin],
+        company_address: [c.company_address],
+        contact_name: contactNames
+    };
+
+    const values =
+        field === 'all'
+            ? Object.values(fieldMap).flat()
+            : fieldMap[field] || [];
+
+    return values
         .filter((p) => p != null && String(p).trim() !== '')
-        .join(' ')
-        .toLowerCase();
+        .map((p) => String(p).toLowerCase());
 };
 
 const CompanyListPage = () => {
@@ -48,6 +56,7 @@ const CompanyListPage = () => {
     const { toast } = useToast();
 
     const [searchQuery, setSearchQuery] = useState('');
+    const [searchField, setSearchField] = useState('all');
     const [statusFilter, setStatusFilter] = useState('All');
     const [sortConfig, setSortConfig] = useState({
         key: 'company_name',
@@ -68,7 +77,10 @@ const CompanyListPage = () => {
         const q = searchQuery.trim().toLowerCase();
         let filtered = companies.filter((c) => {
             const matchesSearch =
-                q === '' || buildCompanySearchHaystack(c).includes(q);
+                q === '' ||
+                getCompanySearchValuesByField(c, searchField).some((value) =>
+                    value.includes(q)
+                );
             const matchesStatus =
                 statusFilter === 'All' || c.status === statusFilter;
             return matchesSearch && matchesStatus;
@@ -89,7 +101,7 @@ const CompanyListPage = () => {
         });
 
         return filtered;
-    }, [companies, searchQuery, statusFilter, sortConfig]);
+    }, [companies, searchQuery, searchField, statusFilter, sortConfig]);
 
     const handleDelete = async (company) => {
         if (
@@ -212,15 +224,31 @@ const CompanyListPage = () => {
 
                 {/* Filters */}
                 <div className='bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4'>
-                    <div className='relative w-full md:w-1/3 min-w-[300px]'>
-                        <Search className='absolute left-3 top-2.5 w-5 h-5 text-gray-400' />
-                        <input
-                            type='text'
-                            placeholder='Search by TIN, company, address, or contact...'
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className='w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 bg-gray-50/50 outline-none'
-                        />
+                    <div className='flex flex-col sm:flex-row gap-2 w-full md:w-1/2 min-w-[300px]'>
+                        <div className='relative w-full sm:w-48 shrink-0'>
+                            <select
+                                value={searchField}
+                                onChange={(e) => setSearchField(e.target.value)}
+                                className='w-full h-[46px] pl-3 pr-10 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 bg-gray-50/50 outline-none appearance-none'
+                            >
+                                {SEARCH_FIELD_OPTIONS.map((opt) => (
+                                    <option key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                    </option>
+                                ))}
+                            </select>
+                            <ChevronDown className='absolute right-3 top-3.5 w-4 h-4 text-gray-400 pointer-events-none' />
+                        </div>
+                        <div className='relative w-full'>
+                            <Search className='absolute left-3 top-2.5 w-5 h-5 text-gray-400' />
+                            <input
+                                type='text'
+                                placeholder='Search company records...'
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className='w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 bg-gray-50/50 outline-none'
+                            />
+                        </div>
                     </div>
                     <div className='flex items-center gap-4 text-sm font-medium text-gray-700'>
                         <span>Status:</span>

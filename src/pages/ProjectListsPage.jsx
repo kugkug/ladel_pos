@@ -95,6 +95,7 @@ const ProjectListsPage = () => {
 
     const [filters, setFilters] = useState({
         search: '',
+        searchField: 'all',
         company: 'All',
         datePreset: null,
         dateRange: { start: null, end: null },
@@ -302,6 +303,7 @@ const ProjectListsPage = () => {
                                                     onClick={() =>
                                                         setFilters({
                                                             search: '',
+                                                            searchField: 'all',
                                                             company: 'All',
                                                             datePreset: null,
                                                             dateRange: {

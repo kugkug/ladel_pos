@@ -9,7 +9,8 @@ import {
     Trash2,
     Plus,
     Filter,
-    X
+    X,
+    ChevronDown
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,17 @@ const MONTHS = [
     'December'
 ];
 
+const SEARCH_FIELD_OPTIONS = [
+    { value: 'all', label: 'All Columns' },
+    { value: 'internal_code', label: 'Internal Code' },
+    { value: 'financial_impact', label: 'P&L and NCP' },
+    { value: 'chart_of_account', label: 'Chart of Account' },
+    { value: 'description', label: 'Description' },
+    { value: 'supplier_name', label: 'Supplier' },
+    { value: 'payment_source', label: 'Payment Source' },
+    { value: 'amount_php', label: 'Amount' }
+];
+
 const formatDate = (dateStr) => {
     if (!dateStr) return '—';
     const d = new Date(dateStr);
@@ -70,6 +82,7 @@ const ExpensesList = () => {
     const [expenses, setExpenses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchField, setSearchField] = useState('all');
     const [filterType, setFilterType] = useState('All');
     const [filterMonth, setFilterMonth] = useState('All Months');
 
@@ -172,71 +185,51 @@ const ExpensesList = () => {
         exp.data.date_of_receipt || exp.data.date_of_transaction || 'N/A';
     const getDesc = (exp) => exp.data.description || exp.data.notes || '';
 
-    /** Single search box matches any of these fields (case-insensitive, partial). */
-    const buildExpenseSearchHaystack = (exp) => {
+    const getSearchValuesForField = (exp, field = 'all') => {
         const d = exp.data || {};
         const amt = getAmount(exp);
-        const parts = [
-            exp.internal_code,
-            getEntityName(exp),
-            getDesc(exp),
-            getTypeLabel(exp.type),
-            d.supplier_name,
-            d.supplier_tin,
-            d.address,
-            d.description,
-            d.notes,
-            d.payment_source,
-            d.bank_source,
-            d.bank_funded,
-            d.payment_method,
-            d.fund_by,
-            d.reimbursed_by,
-            d.paid_to,
-            d.chart_of_account,
-            d.financial_impact,
-            d.type_of_receipt,
-            d.month,
-            Number.isFinite(amt) ? String(amt) : '',
-            Number.isFinite(amt) ? amt.toFixed(2) : '',
-            Number.isFinite(amt)
-                ? amt.toLocaleString('en-PH', { minimumFractionDigits: 2 })
-                : '',
-            d.amount_php != null && d.amount_php !== ''
-                ? String(d.amount_php)
-                : ''
-        ];
+        const fieldMap = {
+            internal_code: [exp.internal_code],
+            financial_impact: [d.financial_impact],
+            chart_of_account: [d.chart_of_account],
+            description: [d.description, d.notes],
+            supplier_name: [d.supplier_name, getEntityName(exp)],
+            payment_source: [
+                d.payment_source,
+                d.bank_source,
+                d.bank_funded,
+                d.payment_method
+            ],
+            amount_php: [
+                d.amount_php,
+                Number.isFinite(amt) ? String(amt) : '',
+                Number.isFinite(amt) ? amt.toFixed(2) : '',
+                Number.isFinite(amt)
+                    ? amt.toLocaleString('en-PH', {
+                          minimumFractionDigits: 2
+                      })
+                    : ''
+            ]
+        };
 
-        // Regular expense compliance (form labels: VAT Register, No VAT, No Official Receipt)
-        if (exp.type === 'regular-expenses') {
-            if (d.valid_for_itr === true) {
-                parts.push('vat register', 'itr');
-            }
-            if (d.valid_for_vat === true) {
-                parts.push('no vat', 'non-vat');
-            }
-            if (d.valid_for_vat === false) {
-                parts.push('valid for vat', 'vat');
-            }
-            if (d.valid_for_official_receipt === true) {
-                parts.push('no official receipt');
-            }
-            if (d.valid_for_official_receipt === false) {
-                parts.push('official receipt');
-            }
-        }
+        const values =
+            field === 'all'
+                ? Object.values(fieldMap).flat()
+                : fieldMap[field] || [];
 
-        return parts
+        return values
             .filter((p) => p != null && String(p).trim() !== '')
-            .join(' ')
-            .toLowerCase();
+            .map((p) => String(p).toLowerCase());
     };
 
     // Filter the list
     const filteredExpenses = expenses.filter((exp) => {
         const q = searchTerm.trim().toLowerCase();
         const matchesSearch =
-            q === '' || buildExpenseSearchHaystack(exp).includes(q);
+            q === '' ||
+            getSearchValuesForField(exp, searchField).some((value) =>
+                value.includes(q)
+            );
         const matchesType = filterType === 'All' || exp.type === filterType;
         const matchesMonth =
             filterMonth === 'All Months' || exp.data.month === filterMonth;
@@ -342,15 +335,38 @@ const ExpensesList = () => {
 
                 <div className='bg-white p-5 rounded-2xl border border-gray-100 shadow-sm transition-all'>
                     <div className='flex flex-col md:flex-row gap-4 justify-between items-center'>
-                        <div className='relative w-full md:w-96 flex-shrink-0'>
-                            <Search className='absolute left-3 top-2.5 w-5 h-5 text-gray-400' />
-                            <input
-                                type='text'
-                                placeholder='Search: internal code, description, supplier, payment source, VAT / receipt flags, amount…'
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className='w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#1B4D5C] bg-gray-50 outline-none transition-all'
-                            />
+                        <div className='w-full md:w-[34rem] flex-shrink-0 flex flex-col sm:flex-row gap-2'>
+                            <div className='relative w-full sm:w-56'>
+                                <select
+                                    value={searchField}
+                                    onChange={(e) =>
+                                        setSearchField(e.target.value)
+                                    }
+                                    className='w-full h-[42px] px-3 pr-10 border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#1B4D5C] bg-gray-50 outline-none appearance-none transition-all'
+                                >
+                                    {SEARCH_FIELD_OPTIONS.map((opt) => (
+                                        <option
+                                            key={opt.value}
+                                            value={opt.value}
+                                        >
+                                            {opt.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <ChevronDown className='absolute right-3 top-3 w-4 h-4 text-gray-400 pointer-events-none' />
+                            </div>
+                            <div className='relative flex-1'>
+                                <Search className='absolute left-3 top-2.5 w-5 h-5 text-gray-400' />
+                                <input
+                                    type='text'
+                                    placeholder='Search expenses...'
+                                    value={searchTerm}
+                                    onChange={(e) =>
+                                        setSearchTerm(e.target.value)
+                                    }
+                                    className='w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#1B4D5C] bg-gray-50 outline-none transition-all'
+                                />
+                            </div>
                         </div>
 
                         <div className='flex flex-wrap items-center gap-3 w-full md:w-auto'>
@@ -397,6 +413,7 @@ const ExpensesList = () => {
                                         setFilterType('All');
                                         setFilterMonth('All Months');
                                         setSearchTerm('');
+                                        setSearchField('all');
                                     }}
                                     className='text-gray-500 hover:text-red-600'
                                 >
@@ -733,17 +750,24 @@ const ExpensesList = () => {
                                                         <div className='w-2 h-2 rounded-full bg-[#1B4D5C] mr-2'></div>
                                                         Compliance
                                                     </h4>
+
                                                     <div className='grid grid-cols-2 gap-y-4 gap-x-6 bg-gray-50/50 p-4 rounded-xl border border-gray-100'>
                                                         <InfoField
-                                                            label='Valid for ITR'
+                                                            label='VAT Register'
                                                             value={formatBool(
                                                                 data.valid_for_itr
                                                             )}
                                                         />
                                                         <InfoField
-                                                            label='Valid for VAT'
+                                                            label='No VAT'
                                                             value={formatBool(
                                                                 data.valid_for_vat
+                                                            )}
+                                                        />
+                                                        <InfoField
+                                                            label='No Official Receipt'
+                                                            value={formatBool(
+                                                                data.valid_for_official_receipt
                                                             )}
                                                         />
                                                     </div>

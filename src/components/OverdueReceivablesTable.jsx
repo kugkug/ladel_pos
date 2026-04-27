@@ -11,6 +11,21 @@ const formatCurrency = (amount) => {
     }).format(amount || 0);
 };
 
+const getAmountDue = (invoice) => {
+    const invoiceTotal = Number(invoice?.total_amount) || 0;
+    const isPartial =
+        String(invoice?.projects?.payment_status).toLowerCase() === 'partial';
+
+    if (!isPartial) return invoiceTotal;
+
+    const paidAmount = (invoice?.payments || []).reduce(
+        (sum, payment) => sum + (Number(payment.amount_paid) || 0),
+        0
+    );
+
+    return Math.max(invoiceTotal - paidAmount, 0);
+};
+
 const OverdueReceivablesTable = () => {
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -27,6 +42,9 @@ const OverdueReceivablesTable = () => {
             id,
             invoice_number,
             total_amount,
+            payments (
+              amount_paid
+            ),
             due_date,
             status,
             invoice_issue_status,
@@ -47,6 +65,15 @@ const OverdueReceivablesTable = () => {
 
                 if (fetchError) throw fetchError;
 
+                // const balance = (invoices || []).reduce(
+                //     (acc, inv) =>
+                //         acc +
+                //         (Number(inv.total_amount) -
+                //             (Number(inv.payments?.amount_paid) || 0)),
+                //     0
+                // );
+
+                // console.log(balance);
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
 
@@ -70,13 +97,10 @@ const OverdueReceivablesTable = () => {
                 filtered.sort(
                     (a, b) => new Date(a.due_date) - new Date(b.due_date)
                 );
-
+                console.log(filtered);
                 setData(filtered);
                 setTotalAmount(
-                    filtered.reduce(
-                        (acc, item) => acc + (Number(item.total_amount) || 0),
-                        0
-                    )
+                    filtered.reduce((acc, item) => acc + getAmountDue(item), 0)
                 );
             } catch (err) {
                 console.error('Error fetching overdue receivables:', err);
@@ -181,7 +205,7 @@ const OverdueReceivablesTable = () => {
                                             {projectName}
                                         </td>
                                         <td className='amount font-bold text-red-700'>
-                                            {formatCurrency(item.total_amount)}
+                                            {formatCurrency(getAmountDue(item))}
                                         </td>
                                         <td className='text-red-600 font-medium'>
                                             {dueDate}
