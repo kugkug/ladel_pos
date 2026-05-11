@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useRef } from 'react';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import { loginUser as apiLoginUser, logoutUser as apiLogoutUser } from '@/lib/authService';
@@ -13,6 +13,9 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const { toast } = useToast();
+
+  /** Tracks last established session user id to ignore duplicate SIGNED_IN after tab resume / idle. */
+  const signedInUserIdRef = useRef(null);
 
   const loadUserPermissions = async (userId, role) => {
     if (role === 'STAFF') {
@@ -62,11 +65,14 @@ export const AuthProvider = ({ children }) => {
         if (session?.user && mounted) {
           const profile = await fetchUserProfile(session.user.id);
           const role = profile?.role || 'STAFF';
-          
+
+          signedInUserIdRef.current = session.user.id;
           setCurrentUser(session.user);
           setUserRole(role);
           setIsAuthenticated(true);
           await loadUserPermissions(session.user.id, role);
+        } else if (mounted) {
+          signedInUserIdRef.current = null;
         }
       } catch (err) {
         console.error('Auth initialization error:', err);
@@ -79,23 +85,55 @@ export const AuthProvider = ({ children }) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
-      
-      setIsLoading(true);
-      if (event === 'SIGNED_IN' && session?.user) {
-        const profile = await fetchUserProfile(session.user.id);
-        const role = profile?.role || 'STAFF';
-        
-        setCurrentUser(session.user);
-        setUserRole(role);
-        setIsAuthenticated(true);
-        await loadUserPermissions(session.user.id, role);
-      } else if (event === 'SIGNED_OUT') {
-        setCurrentUser(null);
-        setUserRole(null);
-        setPermissions(null);
-        setIsAuthenticated(false);
+
+      // Background session refresh (e.g. user returns after idle / switches tab) must not
+      // flip global loading — that unmounts protected routes and feels like a full page refresh.
+      if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        if (session?.user) setCurrentUser(session.user);
+        return;
       }
-      setIsLoading(false);
+
+      // First session emit is handled by initializeAuth(); avoid a second loading gate here.
+      if (event === 'INITIAL_SESSION') return;
+
+      if (event === 'SIGNED_IN' && session?.user) {
+        // Supabase may emit SIGNED_IN again when the tab wakes up; treat as silent sync.
+        if (signedInUserIdRef.current === session.user.id) {
+          setCurrentUser(session.user);
+          return;
+        }
+
+        setIsLoading(true);
+        try {
+          const profile = await fetchUserProfile(session.user.id);
+          const role = profile?.role || 'STAFF';
+
+          signedInUserIdRef.current = session.user.id;
+          setCurrentUser(session.user);
+          setUserRole(role);
+          setIsAuthenticated(true);
+          await loadUserPermissions(session.user.id, role);
+        } finally {
+          if (mounted) setIsLoading(false);
+        }
+        return;
+      }
+
+      if (event === 'SIGNED_OUT') {
+        setIsLoading(true);
+        try {
+          signedInUserIdRef.current = null;
+          setCurrentUser(null);
+          setUserRole(null);
+          setPermissions(null);
+          setIsAuthenticated(false);
+        } finally {
+          if (mounted) setIsLoading(false);
+        }
+        return;
+      }
+
+      // PASSWORD_RECOVERY and other events: never toggle the global loading shell
     });
 
     return () => {
