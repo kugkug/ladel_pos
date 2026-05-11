@@ -23,7 +23,8 @@ const AddPaymentModal = ({ isOpen, onClose, project, invoices, onSaveSuccess }) 
     amount_paid: '', 
     payment_method: 'Bank Transfer', 
     arNumber: '', 
-    notes: ''
+    notes: '',
+    markProjectFullyPaid: false
   });
 
   const [errors, setErrors] = useState({});
@@ -36,7 +37,8 @@ const AddPaymentModal = ({ isOpen, onClose, project, invoices, onSaveSuccess }) 
         amount_paid: '', 
         payment_method: 'Bank Transfer', 
         arNumber: '', 
-        notes: '' 
+        notes: '',
+        markProjectFullyPaid: false
       });
       setErrors({});
     }
@@ -101,8 +103,11 @@ const AddPaymentModal = ({ isOpen, onClose, project, invoices, onSaveSuccess }) 
       const totalPaid = allPayments.reduce((sum, p) => sum + Number(p.amount_paid), 0);
       const totalInvoiced = invoices.reduce((sum, inv) => sum + Number(inv.total_amount), 0);
       const newStatus = calculatePaymentStatus(totalInvoiced, totalPaid);
+      const finalPaymentStatus = formData.markProjectFullyPaid ? 'Paid' : newStatus;
 
-      if (newStatus !== project.payment_status) await supabase.from('projects').update({ payment_status: newStatus }).eq('id', project.id);
+      if (finalPaymentStatus !== project.payment_status) {
+        await supabase.from('projects').update({ payment_status: finalPaymentStatus }).eq('id', project.id);
+      }
 
       toast({ title: 'Success', description: 'Payment recorded successfully.' });
       onSaveSuccess();
@@ -197,6 +202,20 @@ const AddPaymentModal = ({ isOpen, onClose, project, invoices, onSaveSuccess }) 
               onChange={e => handleInputChange('notes', e.target.value)} 
               className="mt-1 border-gray-300 focus-visible:ring-blue-500" 
             />
+          </div>
+
+          {/* Mark Project Paid */}
+          <div className="flex items-center gap-2">
+            <input
+              id="mark-project-fully-paid"
+              type="checkbox"
+              checked={formData.markProjectFullyPaid}
+              onChange={e => handleInputChange('markProjectFullyPaid', e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <Label htmlFor="mark-project-fully-paid" className="mb-0 cursor-pointer">
+              Mark project as fully paid
+            </Label>
           </div>
           
           <div className="flex justify-end gap-2 pt-4">

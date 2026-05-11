@@ -90,7 +90,22 @@ const getSearchableFieldValuesByKey = (project, searchField = 'all') => {
             project.temporary_po_code,
             project.purchase_order
         ],
-        invoice_number: [project.inv_number, project.invoice_number],
+        invoice_number: [
+            // Handle both array and scalar cases for invoices
+            ...(Array.isArray(project.invoice)
+                ? project.invoice
+                      .map((inv) => inv?.invoice_number)
+                      .filter(Boolean)
+                : [project.invoice?.invoice_number].filter(Boolean)),
+            ...(Array.isArray(project.invoices)
+                ? project.invoices
+                      .map((inv) => inv?.invoice_number)
+                      .filter(Boolean)
+                : [project.invoices?.invoice_number].filter(Boolean)),
+            project.inv_number,
+            project.invoice_number
+        ],
+
         dr_number: [project.dr_number]
     };
 

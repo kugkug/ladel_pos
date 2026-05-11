@@ -139,8 +139,16 @@ const PendingQuotationsTable = () => {
                                             {qt.quotation_number}
                                         </td>
                                         <td>{clientName}</td>
-                                        <td className='font-medium text-gray-900'>
-                                            {projectName}
+                                        <td className='font-medium text-gray-900 whitespace-pre-line break-words max-w-xs'>
+                                            <span
+                                                style={{
+                                                    wordBreak: 'break-word',
+                                                    whiteSpace: 'pre-line',
+                                                    display: 'block'
+                                                }}
+                                            >
+                                                {projectName}
+                                            </span>
                                         </td>
                                         <td className='amount font-bold text-gray-700'>
                                             {formatCurrency(qt.gross_amount)}

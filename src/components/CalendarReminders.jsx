@@ -125,6 +125,8 @@ const CalendarReminders = () => {
         e.preventDefault();
         if (!newReminder.description.trim()) return;
 
+        newReminder.reminder_type = reminderFilter;
+
         setIsSubmitting(true);
         try {
             await createCustomReminder(newReminder);
@@ -370,7 +372,9 @@ const CalendarReminders = () => {
                                                         className={`event-badge event-${evt.type}`}
                                                         title={evt.title}
                                                         onClick={() =>
-                                                            handleEventClick(evt)
+                                                            handleEventClick(
+                                                                evt
+                                                            )
                                                         }
                                                         role='button'
                                                         tabIndex={
@@ -695,12 +699,12 @@ const CalendarReminders = () => {
                                     <span
                                         className={`reminder-badge ${rem.reminder_type}`}
                                     >
-                                        {rem.reminder_type === 'system'
-                                            ? '⚙️ System'
-                                            : '✏️ Custom'}
+                                        {rem.reminder_type === 'collections'
+                                            ? '⚙️ Collections'
+                                            : '✏️ Customers'}
                                     </span>
                                 </div>
-                                {rem.reminder_type === 'custom' && (
+                                {rem.reminder_type === 'customers' && (
                                     <button
                                         className='btn-delete'
                                         onClick={() =>
