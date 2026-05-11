@@ -21,6 +21,7 @@ export const QuotationProvider = ({ children }) => {
     if (data.order_description) payload.order_description = data.order_description;
     if (data.amount) payload.net_amount = parseFloat(data.amount);
     if (data.tax_type) payload.tax_type = data.tax_type;
+    if (data.vat_percentage !== undefined) payload.vat_percentage = Number(data.vat_percentage);
     // Removed vat_amount and gross_amount as they are GENERATED ALWAYS AS columns in the database
     if (data.notes) payload.notes = data.notes;
     if (data.project_id) payload.project_id = data.project_id;

@@ -2,6 +2,14 @@ import { supabase } from '@/lib/customSupabaseClient';
 
 let cachedOwnerColumn = null;
 
+const normalizeQuotationTaxType = (taxType) => {
+    if (!taxType) return taxType;
+    if (taxType === 'VAT Exempt') return 'VAT Exempted';
+    return taxType;
+};
+
+const deriveVatPercentage = (taxType) => (taxType === 'VAT (12%)' ? 12 : 0);
+
 /**
  * Detects the owner column dynamically from the schema priority list
  */
@@ -53,9 +61,16 @@ export const createQuotation = async (data) => {
 
         const ownerCol = await detectOwnerColumn();
         const { vat_amount, gross_amount, ...payload } = data;
+        const normalizedTaxType = normalizeQuotationTaxType(payload.tax_type);
+        const normalizedPayload = {
+            ...payload,
+            tax_type: normalizedTaxType,
+            vat_percentage:
+                payload.vat_percentage ?? deriveVatPercentage(normalizedTaxType)
+        };
 
         const payloadWithOwner = {
-            ...payload,
+            ...normalizedPayload,
             [ownerCol]: user.id
         };
 
@@ -118,10 +133,17 @@ export const updateQuotation = async (id, data) => {
 
         const ownerCol = await detectOwnerColumn();
         const { vat_amount, gross_amount, ...payload } = data;
-        console.log(vat_amount, gross_amount, payload);
+        const normalizedTaxType = normalizeQuotationTaxType(payload.tax_type);
+        const normalizedPayload = {
+            ...payload,
+            tax_type: normalizedTaxType,
+            vat_percentage:
+                payload.vat_percentage ?? deriveVatPercentage(normalizedTaxType)
+        };
+
         const { data: updatedQuotation, error } = await supabase
             .from('quotations')
-            .update(payload)
+            .update(normalizedPayload)
             .eq('id', id)
             .eq(ownerCol, user.id)
             .select()

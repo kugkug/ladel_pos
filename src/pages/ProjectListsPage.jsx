@@ -233,7 +233,7 @@ const ProjectListsPage = () => {
                 </div>
 
                 <div className='bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden sticky top-4'>
-                    <div className='overflow-auto max-h-[calc(100vh-220px)]'>
+                    <div className='overflow-auto max-h-[calc(100vh-520px)]'>
                         <table className='w-full text-left min-w-[1000px]'>
                             <thead className='bg-[#1B4D5C] text-white'>
                                 <tr>

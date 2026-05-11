@@ -32,6 +32,8 @@ const calculateGrossAmount = (amount, taxType) => {
     return amount + calculateTaxAmount(amount, taxType);
 };
 
+const getVatPercentage = (taxType) => (taxType === 'VAT (12%)' ? 12 : 0);
+
 const validateProjectData = (projectData, companyId) => {
     const errors = {};
     const uuidRegex =
@@ -195,9 +197,10 @@ const DataEntryPage = () => {
                 quotationNumber: quotationData.quotationNumber,
                 quotationStatus: quotationData.quotationStatus,
                 net_amount: amount,
-                taxType: quotationData.taxType
+                taxType: quotationData.taxType,
+                vat_percentage: getVatPercentage(quotationData.taxType)
             };
-            console.log(qtPayload);
+
             if (quotationData.dateIssued)
                 qtPayload.dateIssued = quotationData.dateIssued;
             if (quotationData.orderDescription)
@@ -594,8 +597,8 @@ const DataEntryPage = () => {
                                     className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1'
                                 >
                                     <option value='VAT (12%)'>VAT (12%)</option>
-                                    <option value='VAT Exempt'>
-                                        VAT Exempt
+                                    <option value='VAT Exempted'>
+                                        VAT Exempted
                                     </option>
                                 </select>
                             </div>

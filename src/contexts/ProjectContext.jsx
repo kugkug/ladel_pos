@@ -158,6 +158,11 @@ export const ProjectProvider = ({ children }) => {
                 }
                 if (quotationData.taxType)
                     qtPayload.tax_type = quotationData.taxType;
+                if (quotationData.vat_percentage !== undefined) {
+                    qtPayload.vat_percentage = Number(
+                        quotationData.vat_percentage
+                    );
+                }
 
                 const { data: qtData, error: qtError } = await supabase
                     .from('quotations')

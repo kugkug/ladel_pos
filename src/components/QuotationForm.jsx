@@ -24,6 +24,8 @@ const calculateGrossAmount = (amount, taxType) => {
   return amount + calculateTaxAmount(amount, taxType);
 };
 
+const getVatPercentage = (taxType) => (taxType === 'VAT (12%)' ? 12 : 0);
+
 const QuotationForm = ({ isOpen, onClose, project, onSaveSuccess }) => {
   const { toast } = useToast();
   const { currentUser } = useAuth();
@@ -100,7 +102,8 @@ const QuotationForm = ({ isOpen, onClose, project, onSaveSuccess }) => {
         date_issued: formData.date_issued || null,
         order_description: formData.order_description || null,
         net_amount: amount,
-        tax_type: formData.tax_type
+        tax_type: formData.tax_type,
+        vat_percentage: getVatPercentage(formData.tax_type)
       };
 
       // Use the new quotationService logic
@@ -181,7 +184,7 @@ const QuotationForm = ({ isOpen, onClose, project, onSaveSuccess }) => {
               <div>
                 <Label>Tax Type</Label>
                 <select value={formData.tax_type} onChange={e => setFormData({...formData, tax_type: e.target.value})} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1">
-                  <option value="VAT (12%)">VAT (12%)</option><option value="VAT Exempt">VAT Exempt</option>
+                  <option value="VAT (12%)">VAT (12%)</option><option value="VAT Exempted">VAT Exempted</option>
                 </select>
               </div>
             </div>

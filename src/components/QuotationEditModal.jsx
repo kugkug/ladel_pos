@@ -28,6 +28,13 @@ const calculateGrossAmount = (amount, taxType) => {
     return amount + calculateTaxAmount(amount, taxType);
 };
 
+const getVatPercentage = (taxType) => (taxType === 'VAT (12%)' ? 12 : 0);
+
+const normalizeTaxType = (taxType) => {
+    if (taxType === 'VAT Exempt') return 'VAT Exempted';
+    return taxType || 'VAT (12%)';
+};
+
 const QuotationEditModal = ({
     isOpen,
     onClose,
@@ -59,7 +66,7 @@ const QuotationEditModal = ({
                 quotation_status: data.quotation_status || 'Pending',
                 order_description: data.order_description || '',
                 net_amount: data.net_amount || '',
-                tax_type: data.tax_type || 'VAT (12%)'
+                tax_type: normalizeTaxType(data.tax_type)
             });
             setFormErrors({});
             setHasAttemptedSubmit(false);
@@ -115,6 +122,7 @@ const QuotationEditModal = ({
                 order_description: formData.order_description || null,
                 net_amount: amount,
                 tax_type: formData.tax_type,
+                vat_percentage: getVatPercentage(formData.tax_type),
                 vat_amount: vatAmount
             };
             console.log(payload);
@@ -297,8 +305,8 @@ const QuotationEditModal = ({
                                     className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1'
                                 >
                                     <option value='VAT (12%)'>VAT (12%)</option>
-                                    <option value='VAT Exempt'>
-                                        VAT Exempt
+                                    <option value='VAT Exempted'>
+                                        VAT Exempted
                                     </option>
                                 </select>
                             </div>
