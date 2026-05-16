@@ -28,7 +28,7 @@ const calculateGrossAmount = (amount, taxType) => {
     return amount + calculateTaxAmount(amount, taxType);
 };
 
-const getVatPercentage = (taxType) => (taxType === 'VAT (12%)' ? 12 : 0);
+const getVatPercentage = (taxType) => (taxType === 'VAT (12%)' ? 0.12 : 0);
 
 const normalizeTaxType = (taxType) => {
     if (taxType === 'VAT Exempt') return 'VAT Exempted';
@@ -66,7 +66,7 @@ const QuotationEditModal = ({
                 quotation_status: data.quotation_status || 'Pending',
                 order_description: data.order_description || '',
                 net_amount: data.net_amount || '',
-                tax_type: normalizeTaxType(data.tax_type)
+                tax_type: 'VAT (12%)'
             });
             setFormErrors({});
             setHasAttemptedSubmit(false);
